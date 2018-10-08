@@ -26,6 +26,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 
+    // Hardware resources grabbed in initializePlayer() must
+    // be locked as LATE as possible when the app goes into foreground,
+    // so that these resources are available for other apps as long as possible.
+    // API 24 introduced multiple windows.
+    // So since API 24 we must grab resources and show media in onStart and release in onStop.
+    // Before API 24 we grab resources in onResume and release in onPause.
+
     override fun onStart() {
         super.onStart()
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
@@ -83,6 +90,7 @@ class MainActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
     }
 
+    // We MUST release hardware resources when the app goes to background!
     private fun releasePlayer() {
         if (player != null) {
             playbackPosition = player?.currentPosition ?: 0
