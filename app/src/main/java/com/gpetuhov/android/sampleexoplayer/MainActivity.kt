@@ -13,6 +13,7 @@ import android.view.View
 
 
 // Don't forget to include android:configChanges for this activity in the manifest file
+// (this is needed not to reset playback position on screen rotation)
 class MainActivity : AppCompatActivity() {
 
     private var player: SimpleExoPlayer? = null
@@ -58,8 +59,6 @@ class MainActivity : AppCompatActivity() {
         if (player == null) {
             player = ExoPlayerFactory.newSimpleInstance(this)
             playerView.player = player
-            player?.playWhenReady = playWhenReady
-            player?.seekTo(currentWindow, playbackPosition)
         }
 
         val uri = Uri.parse(getString(R.string.media_url_mp4))
@@ -69,8 +68,12 @@ class MainActivity : AppCompatActivity() {
                 .createMediaSource(uri)
 
         player?.prepare(mediaSource, true, false)
+
+        player?.playWhenReady = playWhenReady
+        player?.seekTo(currentWindow, playbackPosition)
     }
 
+    // This is needed for playing video in fullscreen
     private fun hideSystemUi() {
         playerView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LOW_PROFILE
                 or View.SYSTEM_UI_FLAG_FULLSCREEN
