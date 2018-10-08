@@ -20,14 +20,12 @@ android {
         }
     }
 
-    // Don't forget to include this to use android resources (R, manifest) in unit tests
-    testOptions {
-        unitTests {
-            includeAndroidResources = true
-        }
+    // Required by ExoPlayer
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
     }
 }
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
@@ -50,4 +48,10 @@ dependencies {
     // Kotlin Coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+
+    // ExoPlayer
+    implementation 'com.google.android.exoplayer:exoplayer:2.9.0'
+    // To use ExoPlayer with AndroidX, include these lines in gradle.properties file:
+    // android.useAndroidX=true
+    // android.enableJetifier=true
 }
