@@ -9,32 +9,20 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import android.net.Uri
 import android.os.Build
-import android.os.PersistableBundle
 import android.view.View
 
 
+// Don't forget to include android:configChanges for this activity in the manifest file
 class MainActivity : AppCompatActivity() {
-
-    companion object {
-        const val PLAYBACK_POSITION_KEY = "playback_position"
-        const val CURRENT_WINDOW_KEY = "current_window"
-        const val PLAYBACK_WHEN_READY_KEY = "playback_when_ready"
-    }
 
     private var player: SimpleExoPlayer? = null
     private var playbackPosition: Long = 0
     private var currentWindow: Int = 0
-    private var playWhenReady: Boolean = false
+    private var playWhenReady: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        savedInstanceState?.apply {
-            playbackPosition = getLong(PLAYBACK_POSITION_KEY, 0)
-            currentWindow = getInt(CURRENT_WINDOW_KEY, 0)
-            playWhenReady = getBoolean(PLAYBACK_WHEN_READY_KEY, false)
-        }
     }
 
     override fun onStart() {
@@ -66,31 +54,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
-        outState?.apply {
-            putLong(PLAYBACK_POSITION_KEY, playbackPosition)
-            putInt(CURRENT_WINDOW_KEY, currentWindow)
-            putBoolean(PLAYBACK_WHEN_READY_KEY, playWhenReady)
-        }
-
-        super.onSaveInstanceState(outState, outPersistentState)
-    }
-
     private fun initializePlayer() {
-        player = ExoPlayerFactory.newSimpleInstance(this)
-
-        playerView.player = player
+        if (player == null) {
+            player = ExoPlayerFactory.newSimpleInstance(this)
+            playerView.player = player
+            player?.playWhenReady = playWhenReady
+            player?.seekTo(currentWindow, playbackPosition)
+        }
 
         val uri = Uri.parse(getString(R.string.media_url_mp4))
 
         val mediaSource = ExtractorMediaSource.Factory(
-                DefaultHttpDataSourceFactory("exoplayer-codelab"))
+                DefaultHttpDataSourceFactory("SampleExoPlayer"))
                 .createMediaSource(uri)
 
         player?.prepare(mediaSource, true, false)
-
-        player?.playWhenReady = playWhenReady
-        player?.seekTo(currentWindow, playbackPosition)
     }
 
     private fun hideSystemUi() {
@@ -103,10 +81,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun releasePlayer() {
-        playbackPosition = player?.currentPosition ?: 0
-        currentWindow = player?.currentWindowIndex ?: 0
-        playWhenReady = player?.playWhenReady ?: false
-        player?.release()
-        player = null
+        if (player != null) {
+            playbackPosition = player?.currentPosition ?: 0
+            currentWindow = player?.currentWindowIndex ?: 0
+            playWhenReady = player?.playWhenReady ?: false
+            player?.release()
+            player = null
+        }
     }
 }
